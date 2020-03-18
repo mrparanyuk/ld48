@@ -18,13 +18,10 @@ function Vertex(x, y, verticles, options) {
 }
 
 function drawVertices(vertices) {
-    push();
     beginShape();
     stroke(255,255,255);
     for (var i = 0; i < vertices.length; i++) {
-        fill(0, 0, 255)
         vertex(vertices[i].x, vertices[i].y);
     }
     endShape(CLOSE);
-    pop();
 }

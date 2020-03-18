@@ -11,7 +11,7 @@ function Bridge(xx, yy, columns, rows, columnGap, rowGap) {
 
         return newBox.body;
     }).bind(this));
-    this.body = Composites.chain(rects, 0.5, 0, -0.5, 0, {stiffness: 1, length: 2, render: {type: 'line'}});
+    this.body = Composites.chain(rects, 0.5, 0, -0.5, 0, {stiffness: .5, angularStiffness: .5, length: 2, render: {type: 'line'}});
     this.type = UNITS.TYPE_BRIDGE;
 
     World.add(world, this.body);
@@ -21,13 +21,15 @@ function Bridge(xx, yy, columns, rows, columnGap, rowGap) {
         pointA: {x: xx, y: yy},
         bodyB: rects.bodies[0],
         pointB: {x: -1 * this.itemWidth / 2, y: 0},
-        stiffness:1
+        stiffness:.5,
+        angularStiffness: .5
     }));
     Composite.add(rects, Constraint.create({
         pointA: {x: xx + this.w, y: yy},
         bodyB: rects.bodies[rects.bodies.length-1],
         pointB: {x: +this.itemWidth / 2, y: 0},
-        stiffness: 1
+        stiffness: .5,
+        angularStiffness: .5
     }));
 
     this.computed = {};

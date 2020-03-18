@@ -28,7 +28,7 @@ function Box(x, y, w, h, options, angle, icon) {
       if (icon) {
           textSize(24);
           fill(0, 255, 0);
-          textFont(fontawesome);
+          textFont(fontawesome1);
           text(icon, pos.x - vvv, pos.y + 10);
       }
 

@@ -40,6 +40,7 @@ function Player(x, y, r, options) {
     var pos = this.computed;
     var rad = this.body.circleRadius;
     var angle = this.body.angle;
+
     push();
     translate(pos.x, pos.y);
     rotate(angle);
@@ -49,11 +50,12 @@ function Player(x, y, r, options) {
     fill(127);
     circle(0, 0, rad * 2);
     pop();
-      push();
+
+    push();
     var vvv = Math.round(textWidth('o') / 2)
     textSize(24);
     fill(0, 255, 0);
-    textFont(fontawesome);
+    textFont(fontawesome1);
     text('\uf188', pos.x - vvv, pos.y + 10);
   }
 

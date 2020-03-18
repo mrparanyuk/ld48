@@ -14,8 +14,15 @@ var Engine = Matter.Engine,
     level = [],
     scene = Scene.create(),
     gameOver = false,
-	v
+	v,
+    forseX = 1,
+    isLoading = true,
+    youWin = false
 ;
+
+setTimeout(function () {
+    isLoading = false;
+}, 1000)
 
 var engine,
     world,
@@ -23,11 +30,14 @@ var engine,
     player,
     button,
     ground,
-    fontawesome
+    fontawesome1,
+    vertexFont
 ;
 
 function preload() {
-    fontawesome = loadFont('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/webfonts/fa-solid-900.ttf')
+    fontawesome1 = loadFont('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/webfonts/fa-solid-900.ttf')
+    // vertexFont = loadFont('');
+    // vertexFont = loadFont('https://fonts.gstatic.com/s/librebarcode128text/v9/fdNv9tubt3ZEnz1Gu3I4-zppwZ9CWZ16Z0w5QVrS6Q.woff2')z;
 }
 
 function setup() {
@@ -45,16 +55,20 @@ function setup() {
 
     ground = new Box(width / 2, height - 50, width, 1, options);
     var ground1 = new Box(width + width, height - 50, width, 1, options);
-    var ceiling = new Box(width + width / 2, 100, width *  2, 100, options);
+    var ceiling = new Box(width + width / 2, 100, width *  2, 100,  { label: 'multiplerForseX',isStatic: true});
 
-    player = new Player(width / 2 , height - 100, 40, {label: 'Player'});
+    player = new Player(width / 2 - 800, height - 100, 40, {label: 'Player', mass: 50});
 
     // var v = new Vertex(2 * width + width / 2, height, '0 0 1500 -500 1500 0', { isStatic: true});
-    v = new Vertex((2 * width + width / 2) + 230, height - 100, '0 0 1550 0 1550 -150', { isStatic: true});
+    v = new Vertex((2 * width + width / 2) + 230, height - 100, '0 0 1550 0 1550 -150', { label: 'multiplerForseX',isStatic: true});
     var bridge = new Bridge(width, height - 75, 12, 1, 5, 5);
     var bridge2 = new Bridge(100, height - 475, 12, 1, 5, 5);
     var g = new Box(width / 2 + 250, height - 100, 40, 40, {label: 'Gravity'}, false, '\uf35b');
     var g2 = new Box(width, 170, 40, 40, {label: 'Gravity', isStatic: true}, false, '\uf358');
+    var f = new Finish(1900, -350, 0);
+    var f1 = new Finish(1940, -350, 1);
+    var f2 = new Finish(1980, -350, 0);
+
     Scene.add(scene, player);
     Scene.add(scene, ground);
     Scene.add(scene, ground1);
@@ -62,10 +76,13 @@ function setup() {
     Scene.add(scene, v);
     Scene.add(scene, g);
     Scene.add(scene, g2);
-
-
+    Scene.add(scene, f);
+    Scene.add(scene, f1);
+    Scene.add(scene, f2);
     Scene.add(scene, bridge);
     Scene.add(scene, bridge2);
+
+    var finishCollection = [f, f1, f2];
 
     // button = createButton('restart');
     // button.position(ground.body.position.x - 50 + 100, ground.body.position.y - 50);
@@ -95,9 +112,38 @@ function setup() {
                 }, 100);
             }
 
+            if(bodies.filter(function (item) {
+                return item.label === 'Player' || item.label === 'multiplerForseX';
+            }).length === 2) {
+                multiplerForseX(4);
+            }
 
+            if(
+                bodies.filter(function (item) {
+                    return item.label === 'Player' || item.label === 'Finish';
+                }).length === 2
+                &&
+                bodies.filter(function (item) {
+                    return item.label === 'Finish';
+                }).length === 1
+                && ! youWin
+            ) {
+                youWin = true;
+                slowmotion();
+            }
         })
     });
+    Events.on(engine, 'collisionEnd', (event) => {
+        event.pairs.forEach(function (items) {
+            var bodies = [items.bodyA, items.bodyB,];
+
+            if(bodies.filter(function (item) {
+                return item.label === 'Player' || item.label === 'multiplerForseX';
+            }).length === 2) {
+                multiplerForseX(1);
+            }
+        })
+    })
     Events.on(runner, "tick", function (e) {
         if (
             player.body.position.y > height + 10
@@ -108,16 +154,49 @@ function setup() {
 
 
     })
+
 }
 
 var keyboardHandler = function () {
-    if (keyCode === LEFT_ARROW) {
-        Matter.Body.applyForce(player.body, player.body.position, {x: -0.05, y: 0})
-    } else if (keyCode === RIGHT_ARROW) {
-        Matter.Body.applyForce(player.body, player.body.position, {x: 0.05, y: 0})
-    } else if (keyCode === 32) {
-        Matter.Body.applyForce(player.body, player.body.position, {x: 0, y: -0.1 * engine.world.gravity.y})
+    if (youWin) {
+        return false;
     }
+
+    if (keyCode === LEFT_ARROW) {
+        Matter.Body.applyForce(player.body, player.body.position, {x: -0.5 * multiplerForseX(), y: 0})
+    } else if (keyCode === RIGHT_ARROW) {
+        Matter.Body.applyForce(player.body, player.body.position, {x: 0.5 * multiplerForseX(), y: 0})
+    } else if (keyCode === 32) {
+        Matter.Body.applyForce(player.body, player.body.position, {x: 0, y: -1 * engine.world.gravity.y})
+    }
+}
+
+var timeScaleTarget = 1,
+    counter = 0;
+
+function slowmotion(intensity)
+{
+    intensity = intensity || 200;
+    var step = 0;
+    var interval = setInterval(function() {
+        step += 10;
+        var scale = step * 0.005;
+
+        if (scale >= 1) {
+            clearInterval(interval);
+        }
+
+        engine.timing.timeScale = scale;
+    }, intensity);
+}
+
+function multiplerForseX()
+{
+    if (arguments.length) {
+        forseX = arguments[0];
+    }
+
+    return forseX;
 }
 
 function keyPressed() {
@@ -135,26 +214,107 @@ function restart() {
     button.hide();
 }
 
+var blinkLoading = 0,
+divideResult = 0;
+function loading()
+{
+    background(26, 29, 33);
+
+    textSize(148);
+    fill(159, 123, 225);
+    textFont('Faster');
+    var cTW1 = textWidth('VERTEX') / 2;
+    // textFont('Codystar');
+
+    // textFont('Press Start 2P');
+    // textFont('Barcode');
+
+    text('VERTEX', (width / 2) - cTW1, height / 4);
+
+    textFont('Codystar');
+    textSize(60);
+    var cTW1 = textWidth('Loading...') / 2;
+
+    if (blinkLoading <= 12) {
+        text('Loading', (width / 2) - cTW1, height / 4 + 200);
+        blinkLoading++;
+    } else {
+        blinkLoading = 0;
+        if (divideResult > 1) {
+            divideResult = 0;
+        } else {
+            divideResult++;
+        }
+    }
+
+    baseTriangle = width / 12;
+
+    for (var x = 0; x < 12; x++) {
+        if (x % 3 === divideResult) {
+            fill(159, 123, 225);
+        } else if ((x + 1) % 3 === divideResult) {
+            fill(55, 63, 68);
+        } else {
+            fill(36, 46, 50);
+        }
+
+
+        triangle(
+            x * baseTriangle,
+            height,
+            // x * baseTriangle + baseTriangle / 2,
+            // height - 200,
+            width / 2,
+            height / 2,
+            x * baseTriangle + baseTriangle,
+            height
+        );
+    }
+}
+
+function showGameOver()
+{
+    var cTW1 = Math.round(textWidth('You loose') / 2);
+    background(200, 0, 0);
+    fill(100, 0, 0);
+    noStroke(255);
+    rectMode(CENTER);
+    rect(ground.body.position.x, ground.body.position.y, width, 100);
+    fill(50, 0, 0);
+    textSize(24);
+    text('You loose', ground.body.position.x - cTW1, ground.body.position.y - 15);
+}
+
 function draw() {
-  if (gameOver) {
-      var cTW1 = Math.round(textWidth('You loose') / 2);
-      background(200, 0, 0);
-      fill(100, 0, 0);
-      noStroke(255);
-      rectMode(CENTER);
-      rect(ground.body.position.x, ground.body.position.y, width, 100);
-      fill(50, 0, 0);
-      textSize(24);
-      text('You loose', ground.body.position.x - cTW1, ground.body.position.y - 15);
+  if (isLoading) {
+      loading();
+  } else if (gameOver) {
+      showGameOver();
   } else {
       Engine.update(engine);
       fill(50, 0, 0);
       background(51);
 
-
-      Scene.computeScene(scene, player).forEach(function (item) {
+      Scene.computeScene(scene, youWin ? { x: player.body.position.x - 350, y: player.body.position.y } : player.body.position).forEach(function (item) {
           item.show();
       });
 
+      if (youWin) {
+          push();
+          fill('rgba(255,255,255,.2)');
+          rect(0, 0, width, height);
+
+          textSize(148);
+          fill(0, 0, 0);
+          textFont('Faster');
+          var cTW1 = textWidth('You win') / 2;
+          // textFont('Codystar');
+
+          // textFont('Press Start 2P');
+          // textFont('Barcode');
+
+          text('You win', (width / 2) - cTW1, height / 4);
+          pop();
+      }
   }
 }
