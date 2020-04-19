@@ -9,9 +9,9 @@ function Snow(x, y) {
         var newBox = new BoxComposite(x + Math.round(getRandomArbitrary(1, 200)), y, 2, 2,
             {
                 // isStatic: true,
-                label: 'Show',
+                label: 'Snow',
                 mass: .01,
-                frictionAir:  getRandomArbitrary(.9, 0.0001)
+                frictionAir:  getRandomArbitrary(.9, 0.01)
             }
         )
 
