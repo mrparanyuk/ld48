@@ -1,3 +1,8 @@
+var screen = {
+    width: 1200,
+    height: 800
+}
+
 // module aliases
 var Engine = Matter.Engine,
     Runner = Matter.Runner,
@@ -41,7 +46,7 @@ function preload() {
 }
 
 function setup() {
-    createCanvas(innerWidth, innerHeight);
+    createCanvas(screen.width, screen.height);
     engine = Engine.create();
     world = engine.world;
 
@@ -53,27 +58,79 @@ function setup() {
         isStatic: true
     };
 
-    ground = new Box(width / 2, height - 50, width, 1, options);
-    var ground1 = new Box(width + width, height - 50, width, 1, options);
-    var ceiling = new Box(width + width / 2, 100, width *  2, 100,  { label: 'multiplerForseX',isStatic: true});
+    ground = new Box(screen.width / 2, screen.height - 50, screen.width, 1, options);
+    var ground1 = new Box(screen.width + screen.width, screen.height - 50, screen.width, 1, options);
+    var ceiling = new Box(screen.width + screen.width / 2, 100, screen.width *  2, 100,  { label: 'multiplerForseX',isStatic: true});
 
-    player = new Player(width / 2 - 800, height - 100, 40, {label: 'Player', mass: 50});
+    // player = new Player(screen.width / 2 - 800, screen.height - 100, 40, {label: 'Player', mass: 50});
+    player = new Player(screen.width / 2 + 250, 0, 40, {label: 'Player', mass: 10});
 
-    // var v = new Vertex(2 * width + width / 2, height, '0 0 1500 -500 1500 0', { isStatic: true});
-    v = new Vertex((2 * width + width / 2) + 230, height - 100, '0 0 1550 0 1550 -150', { label: 'multiplerForseX',isStatic: true});
-    var bridge = new Bridge(width, height - 75, 12, 1, 5, 5);
-    var bridge2 = new Bridge(100, height - 475, 12, 1, 5, 5);
-    var g = new Box(width / 2 + 250, height - 100, 40, 40, {label: 'Gravity'}, false, '\uf35b');
-    var g2 = new Box(width, 170, 40, 40, {label: 'Gravity', isStatic: true}, false, '\uf358');
+    // var v = new Vertex(2 * width + width / 2, screen.height, '0 0 1500 -500 1500 0', { isStatic: true});
+    // v = new Vertex((2 * screen.width + screen.width / 2) + 230, screen.height - 100, '0 0 1550 0 1550 -150', { label: 'multiplerForseX',isStatic: true});
+    var bridge = new Bridge(screen.width, screen.height - 75, 12, 1, 5, 5);
+    var bridge2 = new Bridge(100, screen.height - 475, 12, 1, 5, 5);
+    var g = new Box(screen.width / 2 + 250, screen.height - 100, 40, 40, {label: 'Gravity'}, false, '\uf35b');
+    var g2 = new Box(screen.width, 170, 40, 40, {label: 'Gravity', isStatic: true}, false, '\uf358');
+
+    // var falledBox = new Box(
+    //     width / 2 + 250,
+    //     0,
+    //     40,
+    //     40,
+    //     {label: 'Gravity'},
+    //     false,
+    //     '\uf35b'
+    // );
+    // var falledBox = new Box(
+    //     width - 200,
+    //     -1250,
+    //     40,
+    //     140,
+    //     {frictionAir: 0.0005}
+    //     // {isStatic: true}
+    // );
+    // var falledBox1 = new Box(
+    //     width - 100,
+    //     -1250,
+    //     40,
+    //     140,
+    //     {frictionAir: 0.05}
+    //     // {isStatic: true}
+    // );
+    // var falledBox2 = new Box(
+    //     width,
+    //     -1250,
+    //     40,
+    //     140,
+    //     {frictionAir: 0.001}
+    //     // {isStatic: true}
+    // );
+
     var f = new Finish(1900, -350, 0);
     var f1 = new Finish(1940, -350, 1);
     var f2 = new Finish(1980, -350, 0);
+
+    Scene.add(scene, new Snow(width / 2 + 300, -1000));
+    var snowC = 10;
+    var interval = setInterval(function() {
+        if (snowC === 0) {
+            clearInterval(interval);
+        }
+        Scene.add(scene, new Snow(width / 2 + 300, -1000));
+        snowC--;
+    }, 1000);
+
+
+
+    var t2 = new Triangle(screen.width / 2 + 350, -50, 20, {isStatic: true});
+    var t = new Triangle(screen.width / 2 + 350, 0, 40, {isStatic: true});
+    var g = new Box(screen.width / 2 + 350, 40, 20, 40, {isStatic: true}, false);
 
     Scene.add(scene, player);
     Scene.add(scene, ground);
     Scene.add(scene, ground1);
     Scene.add(scene, ceiling);
-    Scene.add(scene, v);
+    // Scene.add(scene, v);
     Scene.add(scene, g);
     Scene.add(scene, g2);
     Scene.add(scene, f);
@@ -81,6 +138,11 @@ function setup() {
     Scene.add(scene, f2);
     Scene.add(scene, bridge);
     Scene.add(scene, bridge2);
+    Scene.add(scene, t);
+    Scene.add(scene, t2);
+    // Scene.add(scene, falledBox);
+    // Scene.add(scene, falledBox1);
+    // Scene.add(scene, falledBox2);
 
     var finishCollection = [f, f1, f2];
 
@@ -115,7 +177,7 @@ function setup() {
             if(bodies.filter(function (item) {
                 return item.label === 'Player' || item.label === 'multiplerForseX';
             }).length === 2) {
-                multiplerForseX(4);
+                // multiplerForseX(4);
             }
 
             if(
@@ -146,7 +208,7 @@ function setup() {
     })
     Events.on(runner, "tick", function (e) {
         if (
-            player.body.position.y > height + 10
+            player.body.position.y > screen.height + 10
             || (engine.world.gravity.y < 0 && player.body.position.y + 10 < -1000)
         ) {
             gameOver = true;
@@ -167,7 +229,7 @@ var keyboardHandler = function () {
     } else if (keyCode === RIGHT_ARROW) {
         Matter.Body.applyForce(player.body, player.body.position, {x: 0.5 * multiplerForseX(), y: 0})
     } else if (keyCode === 32) {
-        Matter.Body.applyForce(player.body, player.body.position, {x: 0, y: -1 * engine.world.gravity.y})
+        Matter.Body.applyForce(player.body, player.body.position, {x: 0, y: -.3 * engine.world.gravity.y})
     }
 }
 
@@ -229,14 +291,14 @@ function loading()
     // textFont('Press Start 2P');
     // textFont('Barcode');
 
-    text('VERTEX', (width / 2) - cTW1, height / 4);
+    text('VERTEX', (screen.width / 2) - cTW1, screen.height / 4);
 
     textFont('Codystar');
     textSize(60);
     var cTW1 = textWidth('Loading...') / 2;
 
     if (blinkLoading <= 12) {
-        text('Loading', (width / 2) - cTW1, height / 4 + 200);
+        text('Loading', (screen.width / 2) - cTW1, screen.height / 4 + 200);
         blinkLoading++;
     } else {
         blinkLoading = 0;
@@ -247,7 +309,7 @@ function loading()
         }
     }
 
-    baseTriangle = width / 12;
+    baseTriangle = screen.width / 12;
 
     for (var x = 0; x < 12; x++) {
         if (x % 3 === divideResult) {
@@ -261,13 +323,13 @@ function loading()
 
         triangle(
             x * baseTriangle,
-            height,
+            screen.height,
             // x * baseTriangle + baseTriangle / 2,
-            // height - 200,
-            width / 2,
-            height / 2,
+            // screen.height - 200,
+            screen.width / 2,
+            screen.height / 2,
             x * baseTriangle + baseTriangle,
-            height
+            screen.height
         );
     }
 }
@@ -279,7 +341,7 @@ function showGameOver()
     fill(100, 0, 0);
     noStroke(255);
     rectMode(CENTER);
-    rect(ground.body.position.x, ground.body.position.y, width, 100);
+    rect(ground.body.position.x, ground.body.position.y, screen.width, 100);
     fill(50, 0, 0);
     textSize(24);
     text('You loose', ground.body.position.x - cTW1, ground.body.position.y - 15);
@@ -295,14 +357,19 @@ function draw() {
       fill(50, 0, 0);
       background(51);
 
-      Scene.computeScene(scene, youWin ? { x: player.body.position.x - 350, y: player.body.position.y } : player.body.position).forEach(function (item) {
+      Scene.computeScene(
+          scene,
+          youWin
+              ? { x: player.body.position.x - 350, y: player.body.position.y }
+              : player.body.position
+      ).forEach(function (item) {
           item.show();
       });
 
       if (youWin) {
           push();
           fill('rgba(255,255,255,.2)');
-          rect(0, 0, width, height);
+          rect(0, 0, screen.width, screen.height);
 
           textSize(148);
           fill(0, 0, 0);
@@ -311,9 +378,10 @@ function draw() {
           // textFont('Codystar');
 
           // textFont('Press Start 2P');
-          // textFont('Barcode');
+          textFont(fontawesome1);
 
-          text('You win', (width / 2) - cTW1, height / 4);
+          text('You win', (screen.width / 2) - cTW1, screen.height / 4);
+          // text('\uf188', (screen.width / 2) - cTW1, screen.height / 4);
           pop();
       }
   }

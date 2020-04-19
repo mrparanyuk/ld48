@@ -47,6 +47,22 @@ var Scene = {
         return item;
     },
 
+    computeTree: function(item, offsetX) {
+        item.computedBox = {x: item.body.position.x - offsetX, y: item.body.position.y + offsetY };
+
+        return item;
+    },
+
+    computeTriangle: function(item, offsetX, offsetY) {
+          item.computedVerticles = [
+              {x: item.x0 - offsetX, y: item.y0 - offsetY},
+              {x: item.x1 - offsetX, y: item.y1 - offsetY},
+              {x: item.x2 - offsetX, y: item.y2 - offsetY},
+          ];
+
+          return item;
+    },
+
     computeScene: function (scene, point) {
         var offsetX;
         if (engine.world.gravity.y > 0) {
@@ -63,6 +79,10 @@ var Scene = {
                 return this.computeSceneBridgeItem(item, offsetX, offsetY);
             } else if (item.type && item.type === UNITS.TYPE_VERTICES) {
                 return this.computeSceneVerticesItem(item, offsetX, offsetY);
+            } else if (item.type && item.type === UNITS.TYPE_TREE) {
+                return this.computeTree(item, offsetX, offsetY);
+            }  else if (item.type && item.type === UNITS.TYPE_TRIANGLE) {
+                return this.computeTriangle(item, offsetX, offsetY);
             } else if (item.type && item.type === UNITS.TYPE_ARRAY_VERTICES) {
                 item.boxes = item.boxes.map((function(box) {
                     this.computeSceneVerticesItem(box, offsetX, offsetY);

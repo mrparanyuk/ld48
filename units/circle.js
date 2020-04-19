@@ -35,6 +35,13 @@ function Player(x, y, r, options) {
   this.computed = {};
   World.add(world, this.body);
 
+  // Constraint.create({
+  //     bodyB: ropeA.bodies[0],
+  //     pointB: { x: -25, y: 0 },
+  //     pointA: { x: ropeA.bodies[0].position.x, y: ropeA.bodies[0].position.y },
+  //     stiffness: 0.5
+  // })
+
 
   this.show = function() {
     var pos = this.computed;
